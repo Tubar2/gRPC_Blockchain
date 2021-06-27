@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package blockchain;
+
+option go_package = "/blockchainpb";
+
+// Blockchan object
+message Blockchain {
+    repeated Block chain = 1;
+}
+
+//
+// Auxiliary objetcs for the blockchain
+//
+
+//  User
+message User {
+    string uuid = 1;
+    string node = 2;
+}
+
+//  Transaction
+message Transaction {
+    string uuid = 1;
+    string sender = 2;
+    string receiver = 3;
+    double amount = 4;
+}
+
+//  Block
+message Block {
+    int64 index = 1;
+    int64 proof = 2;
+    string previous_hash = 3;
+    string timestamp = 4;
+    repeated Transaction transactions = 5;
+}
+
+//
+// Requests and Responses
+//
+
+//  > GetBlock
+message GetBlockchainRequest {}
+message GetBlockchainResponse {
+    Blockchain blockchain = 1;
+}
+//  > UpdateUserBalance
+message UpdateUserBalanceRequest {
+    double amount = 1;
+}
+message UpdateUserBalanceResponse {}
+//  > Mineblock
+message MineBlockRequest {}
+message MineBlockResponse {
+    Block block = 1;
+}
+//  > GetUserID
+message GetUserIDRequest {}
+message GetUserIDResponse {
+    string uuid = 1;
+}
+//  > ConnectToNetwork
+message ConnectToNetworkRequest {
+    string node = 1;
+}
+message ConnectToNetworkResponse {
+    string result = 1;
+}
+//  > ConnectUser
+message ConnectUserRequest {
+    User user = 1;
+}
+message ConnectUserResponse {
+    bool result = 1;
+    User user = 2;
+}
+//  > ConnectToNode
+message ConnectToNodeRequest {
+    User user = 1;
+}
+message ConnectToNodeResponse {
+    bool result = 1;
+}
+// > AddTransaction
+message AddTransactionRequest {
+    string sender = 1;
+    string receiver = 2;
+    double amount = 3;
+}
+message AddTransactionResponse {
+    string transactionId = 1;
+}
+// > ReplaceChain
+message ReplaceChainRequest {
+    Blockchain blockchain = 1;
+}
+message ReplaceChainResponse {
+    bool replaced = 1;
+    Blockchain blockchain = 2;
+}
+// > RemoveTransaction
+message RemoveTransactionRequest {
+    string transactionId = 1;
+}
+message RemoveTransactionResponse {
+    bool removed = 1;
+}
+// > GetTransactions
+message GetTransactionsRequest {}
+message GetTransactionsResponse {
+    Transaction transaction = 1;
+}
+// > AppendTransactions
+message AppendTransactionsRequest {
+    Transaction transaction = 1;
+}
+message AppendTransactionsResponse {
+    string result = 1;
+}
+// > GetUser
+message GetUsersRequest{}
+
+// Blockchain service
+service BlockchainService {
+    
+    // Returns all blocks from the blockchain as a stream o blocks
+    rpc GetBlockchain(GetBlockchainRequest) returns (GetBlockchainResponse);
+
+    // Update the user balance
+    rpc UpdateUserBalance(UpdateUserBalanceRequest) returns (UpdateUserBalanceResponse);
+
+    // Mines a block from the created blockchain
+    rpc MineBlock(MineBlockRequest) returns (MineBlockResponse);
+
+    // Trys to replace chain in server
+    rpc ReplaceChain(ReplaceChainRequest) returns (ReplaceChainResponse);
+
+    // Removes a transaction from node
+    rpc RemoveTransaction(RemoveTransactionRequest) returns (RemoveTransactionResponse);
+
+    // Receives a stream of user information to add to current node's network
+    rpc GetUserId(GetUserIDRequest) returns (GetUserIDResponse);
+
+    // Requests to join the network at request's node
+    rpc ConnectToNetwork(ConnectToNetworkRequest) returns (stream ConnectToNetworkResponse);
+
+    // Receives new user to each node in the network
+    rpc ConnectUser(ConnectUserRequest) returns (stream ConnectUserResponse);
+
+    // Connect a single node to the network
+    rpc ConnectToNode(ConnectToNodeRequest) returns (ConnectToNodeResponse);
+
+    // Adds a new specified transaction amount between specified sender, receiver
+    rpc AddTransaction(AddTransactionRequest) returns (AddTransactionResponse);
+
+    // Appends a transaction to server
+    rpc AppendTransactions(AppendTransactionsRequest) returns (AppendTransactionsResponse);
+
+    // Returns a stream of transactions
+    rpc GetTransactions(GetTransactionsRequest) returns (stream GetTransactionsResponse);
+
+    // Returns a stream of users in current node
+    rpc GetUsers(GetUsersRequest) returns (stream User);
+}
